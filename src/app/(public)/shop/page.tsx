@@ -19,14 +19,14 @@ export default async function ShopPage({ searchParams }: { searchParams: SearchP
   const from = (page - 1) * perPage
   const to = from + perPage - 1
 
-  let query = supabase
+  let query = (supabase as any)
     .from('products')
     .select('*, categories(*)', { count: 'exact' })
     .eq('is_active', true)
     .range(from, to)
 
   if (searchParams.category) {
-    const { data: cat } = await supabase
+    const { data: cat } = await (supabase as any)
       .from('categories')
       .select('id')
       .eq('slug', searchParams.category)
@@ -46,19 +46,16 @@ export default async function ShopPage({ searchParams }: { searchParams: SearchP
   }
 
   const { data: products, count } = await query
-
-  const { data: categories } = await supabase.from('categories').select('*')
+  const { data: categories } = await (supabase as any).from('categories').select('*')
 
   return (
     <div className="min-h-screen bg-ivory pt-24">
-      {/* Header */}
       <div className="bg-champagne border-b border-stone-200 py-16">
         <div className="max-w-7xl mx-auto px-6">
           <p className="font-body text-xs text-gold-500 tracking-widest uppercase mb-2">Discover</p>
           <h1 className="font-display text-5xl font-light">The Collection</h1>
         </div>
       </div>
-
       <div className="max-w-7xl mx-auto px-6 py-10">
         <div className="flex flex-col lg:flex-row gap-10">
           <ShopFilters
