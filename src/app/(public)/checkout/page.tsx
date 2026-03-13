@@ -44,20 +44,20 @@ export default function CheckoutPage() {
         country: data.country,
       }
 
-      const { data: order, error: orderErr } = await supabase
-        .from('orders')
-        .insert({
-          user_id: user.id,
-          status: 'pending',
-          subtotal: total,
-          shipping_fee: shipping,
-          total: orderTotal,
-          payment_method: data.payment_method,
-          payment_status: 'pending',
-          shipping_address: shippingAddress,
-        })
-        .select()
-        .single()
+const { data: order, error: orderErr } = await (supabase as any)
+  .from('orders')
+  .insert({
+    user_id: user.id,
+    status: 'pending',
+    subtotal: total,
+    shipping_fee: shipping,
+    total: orderTotal,
+    payment_method: data.payment_method,
+    payment_status: 'pending',
+    shipping_address: shippingAddress,
+  })
+  .select()
+  .single()
 
       if (orderErr || !order) throw orderErr
 
@@ -70,7 +70,7 @@ export default function CheckoutPage() {
         selected_size: item.selected_size,
       }))
 
-      await supabase.from('order_items').insert(orderItems)
+      await (supabase as any).from('order_items').insert(orderItems)
 
       clearCart()
       router.push(`/account/orders/${order.id}?success=true`)
