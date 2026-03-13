@@ -8,26 +8,25 @@ interface Props { params: { slug: string } }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = await createClient()
-  // const { data } = await supabase.from('products').select('name, short_description').eq('slug', params.slug).single()
-  // if (!data) return { title: 'Product Not Found' }
-  // return { title: data.name, description: data.short_description ?? undefined }
   const { data } = await supabase.from('products').select('name, short_description').eq('slug', params.slug).single()
-if (!data) return { title: 'Product Not Found' }
-const product = data as any
-return { title: product.name, description: product.short_description ?? undefined }
+  if (!data) return { title: 'Product Not Found' }
+  const p = data as any
+  return { title: p.name, description: p.short_description ?? undefined }
 }
 
 export default async function ProductPage({ params }: Props) {
   const supabase = await createClient()
 
-  const { data: product } = await supabase
+  const { data: productRaw } = await supabase
     .from('products')
     .select('*, categories(*)')
     .eq('slug', params.slug)
     .eq('is_active', true)
     .single()
 
-  if (!product) notFound()
+  if (!productRaw) notFound()
+
+  const product = productRaw as any
 
   const { data: related } = await supabase
     .from('products')
@@ -40,7 +39,7 @@ export default async function ProductPage({ params }: Props) {
   return (
     <div className="pt-20 bg-ivory min-h-screen">
       <ProductDetail product={product} />
-      {related && related.length > 0 && <RelatedProducts products={related} />}
+      {related && related.length > 0 && <RelatedProducts products={related as any} />}
     </div>
   )
 }
