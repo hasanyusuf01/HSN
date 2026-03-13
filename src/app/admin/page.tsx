@@ -7,22 +7,21 @@ export const metadata = { title: 'Admin Dashboard — Luxe Essence' }
 export default async function AdminDashboard() {
   const supabase = await createClient()
 
-  const [
-    { count: productCount },
-    { count: orderCount },
-    { count: userCount },
-    { data: revenueData },
-    { data: recentOrders },
-  ] = await Promise.all([
-    supabase.from('products').select('*', { count: 'exact', head: true }).eq('is_active', true),
-    supabase.from('orders').select('*', { count: 'exact', head: true }),
-    supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'customer'),
-    supabase.from('orders').select('total').neq('status', 'cancelled'),
-    supabase.from('orders').select('*, profiles(full_name)').order('created_at', { ascending: false }).limit(8),
-  ])
+const [
+  { count: productCount },
+  { count: orderCount },
+  { count: userCount },
+  { data: revenueData },
+  { data: recentOrders },
+] = await Promise.all([
+  (supabase as any).from('products').select('*', { count: 'exact', head: true }).eq('is_active', true),
+  (supabase as any).from('orders').select('*', { count: 'exact', head: true }),
+  (supabase as any).from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'customer'),
+  (supabase as any).from('orders').select('total').neq('status', 'cancelled'),
+  (supabase as any).from('orders').select('*, profiles(full_name)').order('created_at', { ascending: false }).limit(8),
+])
 
-  const totalRevenue = revenueData?.reduce((sum, o) => sum + o.total, 0) || 0
-
+const totalRevenue = (revenueData as any[])?.reduce((sum: number, o: any) => sum + o.total, 0) || 0
   const stats = [
     { label: 'Active Products', value: productCount || 0, icon: Package, color: 'text-blue-500', bg: 'bg-blue-50' },
     { label: 'Total Orders', value: orderCount || 0, icon: ShoppingCart, color: 'text-purple-500', bg: 'bg-purple-50' },
