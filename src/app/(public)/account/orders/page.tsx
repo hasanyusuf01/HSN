@@ -11,12 +11,18 @@ export default async function OrdersPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: orders } = await supabase
-    .from('orders')
-    .select('*, order_items(*, products(name, image_urls))')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
+  // const { data: orders } = await supabase
+  //   .from('orders')
+  //   .select('*, order_items(*, products(name, image_urls))')
+  //   .eq('user_id', user.id)
+  //   .order('created_at', { ascending: false })
+const { data: ordersRaw } = await supabase
+  .from('orders')
+  .select('*, order_items(*, products(name, image_urls))')
+  .eq('user_id', user.id)
+  .order('created_at', { ascending: false })
 
+const orders = ordersRaw as any[] | null
   return (
     <div className="min-h-screen bg-ivory pt-24 pb-16">
       <div className="max-w-4xl mx-auto px-6">
