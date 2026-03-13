@@ -9,9 +9,7 @@ export async function middleware(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
+        getAll() { return request.cookies.getAll() },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({ request })
@@ -24,7 +22,6 @@ export async function middleware(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
-
   const pathname = request.nextUrl.pathname
 
   // Protect account routes
@@ -42,15 +39,13 @@ export async function middleware(request: NextRequest) {
     if (!user) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
-
-    // Check admin role
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single()
 
-    if (profile?.role !== 'admin') {
+    if (!profile || (profile as any).role !== 'admin') {
       return NextResponse.redirect(new URL('/', request.url))
     }
   }
@@ -58,6 +53,11 @@ export async function middleware(request: NextRequest) {
   return supabaseResponse
 }
 
+// ✅ KEY FIX: Only run middleware on protected routes, not every page
 export const config = {
-  matcher: ['/account/:path*', '/checkout/:path*', '/admin/:path*'],
+  matcher: [
+    '/account/:path*',
+    '/checkout/:path*',
+    '/admin/:path*',
+  ],
 }
