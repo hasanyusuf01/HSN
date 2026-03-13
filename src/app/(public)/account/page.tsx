@@ -10,14 +10,16 @@ export default async function AccountPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-  const { data: recentOrders } = await supabase
-    .from('orders')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
-    .limit(5)
+const { data: profileRaw } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+const profile = profileRaw as any
 
+const { data: recentOrdersRaw } = await supabase
+  .from('orders')
+  .select('*')
+  .eq('user_id', user.id)
+  .order('created_at', { ascending: false })
+  .limit(5)
+const recentOrders = recentOrdersRaw as any[] | null
   return (
     <div className="min-h-screen bg-ivory pt-24 pb-16">
       <div className="max-w-4xl mx-auto px-6">
