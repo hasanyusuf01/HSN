@@ -10,12 +10,14 @@ export const metadata = { title: 'Edit Product — Admin' }
 
 export default async function EditProductPage({ params }: Props) {
   const supabase = await createClient()
-  const [{ data: product }, { data: categories }] = await Promise.all([
-    supabase.from('products').select('*').eq('id', params.id).single(),
-    supabase.from('categories').select('*').order('name'),
+  const [{ data: productRaw }, { data: categories }] = await Promise.all([
+    (supabase as any).from('products').select('*').eq('id', params.id).single(),
+    (supabase as any).from('categories').select('*').order('name'),
   ])
 
-  if (!product) notFound()
+  if (!productRaw) notFound()
+
+  const product = productRaw as any
 
   return (
     <div>
