@@ -29,11 +29,11 @@ export default function RegisterPage() {
     })
     if (authError) { setError(authError.message); setLoading(false); return }
     if (authData.user) {
-      await supabase.from('profiles').insert({
-        id: authData.user.id,
-        full_name: data.full_name,
-        role: 'customer',
-      })
+    await (supabase as any).from('profiles').insert({
+  id: authData.user.id,
+  full_name: data.full_name,
+  role: 'customer',
+})
     }
     router.push('/account')
     router.refresh()
