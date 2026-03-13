@@ -15,18 +15,21 @@ export default async function OrderDetailPage({ params, searchParams }: Props) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-const { data: order } = await supabase
+
+  const { data: orderRaw } = await supabase
   .from('orders')
   .select('*, order_items(*, products(name, image_urls, slug))')
   .eq('id', params.id)
   .eq('user_id', user.id)
-  .returns<any>()
   .single()
 
-  if (!order) notFound()
+if (!orderRaw) notFound()
 
-  const items = order.order_items as any[]
-  const address = order.shipping_address as ShippingAddress
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const order = orderRaw as any
+const items: any[] = order.order_items
+const address = order.shipping_address as ShippingAddress
+  
   const isNew = searchParams.success === 'true'
 
   return (
