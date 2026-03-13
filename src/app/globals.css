@@ -15,9 +15,7 @@
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
+
 
   html {
     scroll-behavior: smooth;
