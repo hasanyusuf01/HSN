@@ -15,12 +15,13 @@ export default async function OrderDetailPage({ params, searchParams }: Props) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: order } = await supabase
-    .from('orders')
-    .select('*, order_items(*, products(name, image_urls, slug))')
-    .eq('id', params.id)
-    .eq('user_id', user.id)
-    .single()
+const { data: order } = await supabase
+  .from('orders')
+  .select('*, order_items(*, products(name, image_urls, slug))')
+  .eq('id', params.id)
+  .eq('user_id', user.id)
+  .returns<any>()
+  .single()
 
   if (!order) notFound()
 
