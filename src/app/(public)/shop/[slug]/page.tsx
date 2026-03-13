@@ -7,7 +7,7 @@ import RelatedProducts from '@/components/product/RelatedProducts'
 interface Props { params: { slug: string } }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  // const supabase = await createClient()
+  const supabase = await createClient()
   // const { data } = await supabase.from('products').select('name, short_description').eq('slug', params.slug).single()
   // if (!data) return { title: 'Product Not Found' }
   // return { title: data.name, description: data.short_description ?? undefined }
