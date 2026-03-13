@@ -24,7 +24,11 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginInput) => {
     setLoading(true); setError('')
-    const { error: authError } = await supabase.auth.signInWithPassword(data)
+    // const { error: authError } = await supabase.auth.signInWithPassword(data)
+    const { error: authError } = await supabase.auth.signInWithPassword({
+  email: data.email!,
+  password: data.password!,
+})
     if (authError) { setError(authError.message); setLoading(false); return }
     router.push(redirect)
     router.refresh()
