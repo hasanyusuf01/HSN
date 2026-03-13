@@ -1,9 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useCart } from '@/lib/hooks/useCart'
 import { checkoutSchema, CheckoutInput } from '@/lib/validations'
@@ -16,7 +15,14 @@ export default function CheckoutPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [mounted, setMounted] = useState(false)
   const supabase = createClient()
+
+  useEffect(() => { setMounted(true) }, [])
+
+  useEffect(() => {
+    if (mounted && items.length === 0) router.push('/cart')
+  }, [mounted, items.length, router])
 
   const { register, handleSubmit, formState: { errors } } = useForm<CheckoutInput>({
     resolver: zodResolver(checkoutSchema),
@@ -44,20 +50,20 @@ export default function CheckoutPage() {
         country: data.country,
       }
 
-const { data: order, error: orderErr } = await (supabase as any)
-  .from('orders')
-  .insert({
-    user_id: user.id,
-    status: 'pending',
-    subtotal: total,
-    shipping_fee: shipping,
-    total: orderTotal,
-    payment_method: data.payment_method,
-    payment_status: 'pending',
-    shipping_address: shippingAddress,
-  })
-  .select()
-  .single()
+      const { data: order, error: orderErr } = await (supabase as any)
+        .from('orders')
+        .insert({
+          user_id: user.id,
+          status: 'pending',
+          subtotal: total,
+          shipping_fee: shipping,
+          total: orderTotal,
+          payment_method: data.payment_method,
+          payment_status: 'pending',
+          shipping_address: shippingAddress,
+        })
+        .select()
+        .single()
 
       if (orderErr || !order) throw orderErr
 
@@ -81,10 +87,7 @@ const { data: order, error: orderErr } = await (supabase as any)
     }
   }
 
-  if (items.length === 0) {
-    router.push('/cart')
-    return null
-  }
+  if (!mounted) return null
 
   const fieldClass = "w-full border-b border-stone-200 py-3 bg-transparent font-body text-sm outline-none focus:border-gold-400 transition-colors placeholder:text-stone-300"
   const errClass = "font-body text-xs text-red-500 mt-1"
@@ -99,7 +102,6 @@ const { data: order, error: orderErr } = await (supabase as any)
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-            {/* Shipping Form */}
             <div className="lg:col-span-2 space-y-8">
               <div>
                 <h2 className="font-display text-2xl font-light mb-6">Shipping Information</h2>
@@ -138,7 +140,6 @@ const { data: order, error: orderErr } = await (supabase as any)
                 </div>
               </div>
 
-              {/* Payment */}
               <div>
                 <h2 className="font-display text-2xl font-light mb-6">Payment Method</h2>
                 <div className="space-y-3">
@@ -146,7 +147,7 @@ const { data: order, error: orderErr } = await (supabase as any)
                     { value: 'cod', label: 'Cash on Delivery', sub: 'Pay when your order arrives' },
                     { value: 'bank_transfer', label: 'Bank Transfer', sub: 'We will send you transfer details' },
                   ].map((opt) => (
-                    <label key={opt.value} className="flex items-start gap-4 p-4 border border-stone-200 cursor-pointer hover:border-gold-400 transition-colors has-[:checked]:border-gold-500 has-[:checked]:bg-gold-50/30">
+                    <label key={opt.value} className="flex items-start gap-4 p-4 border border-stone-200 cursor-pointer hover:border-gold-400 transition-colors">
                       <input type="radio" value={opt.value} {...register('payment_method')} className="mt-1 accent-gold-500" />
                       <div>
                         <p className="font-body text-sm font-medium">{opt.label}</p>
@@ -157,12 +158,9 @@ const { data: order, error: orderErr } = await (supabase as any)
                 </div>
               </div>
 
-              {error && (
-                <p className="font-body text-sm text-red-500 bg-red-50 p-3">{error}</p>
-              )}
+              {error && <p className="font-body text-sm text-red-500 bg-red-50 p-3">{error}</p>}
             </div>
 
-            {/* Order Summary */}
             <div>
               <div className="bg-champagne p-6 sticky top-28">
                 <h2 className="font-display text-2xl font-light mb-6">Your Order</h2>
@@ -197,15 +195,14 @@ const { data: order, error: orderErr } = await (supabase as any)
                 <div className="flex justify-between font-body font-medium mb-6">
                   <span>Total</span><span>{formatPrice(orderTotal)}</span>
                 </div>
-                <motion.button
+                <button
                   type="submit"
                   disabled={loading}
                   className="btn-primary w-full flex items-center justify-center gap-2"
-                  whileTap={{ scale: 0.98 }}
                 >
                   {loading ? <Loader2 size={16} className="animate-spin" /> : null}
                   {loading ? 'Placing Order...' : 'Place Order'}
-                </motion.button>
+                </button>
               </div>
             </div>
           </div>
